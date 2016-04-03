@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NVG510 Status</title>
+
+  <link rel="stylesheet" href="bootstrap.min.css">
+  <link rel="stylesheet" href="bootstrap-theme.min.css">
+
+  <style>
+   .well {
+     margin-top: 70px;
+   }
+
+   .list-group {
+     text-align: center;
+     box-shadow: 0px 0px 0px;
+   }
+
+   .progress {
+     height: 40px;
+   }
+
+   .list-group-item {
+     padding: 15px;
+     text-align: center;
+     font-size: 15px;
+   }
+
+   .list-group-item:last-child {
+     border-bottom-right-radius: 10px;
+     border-bottom-left-radius: 10px;
+     border-top-left-radius: 10px;
+     border-top-right-radius: 10px;
+   }
+
+   h3 {
+     padding: 10px 0px 10px 0px;
+   }
+
+   .percentp {
+     font-size: 20px;
+     margin-top: 10px;
+     display: block;
+   }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">NVG510 Status</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="well">
+    <div class="row">
+
+      <div class="col-sm-12">
+        <ul class="list-group">
+          <h3>Progress</h3>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="min-width: 2.9em;width: 100%">
+            <span class="percentp">...</span>
+            </div>
+          </div>
+        </ul>
+      </div>
+
+      <div class="col-sm-6">
+        <ul class="list-group">
+          <h6>Line Status</h6>
+          <li class="list-group-item line-status">...</li>
+        </ul>
+      </div>
+      <div class="col-sm-6">
+        <ul class="list-group">
+          <h6>Internet Status</h6>
+          <li class="list-group-item internet-status">...</li>
+        </ul>
+      </div>
+
+      <div class="col-sm-12">
+        <ul class="list-group" style="margin-top:30px;">
+          <h7><b>Last check done at:</b> <span class="timecheck">00:00:00</span></h7>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+<script src="jquery.min.js"></script>
+<script src="bootstrap.min.js"></script>
+<script type="text/javascript">
+
+  function runCheck(){
+
+    $.getJSON( "status.json", function( json ) {
+      status_percent_js_var = json.status_percent;
+      status_1_js_var = json.status_1;
+      status_2_js_var = json.status_2;
+
+      if(status_percent_js_var <= 99){
+        $(".progress-bar").removeClass("progress-bar-success");
+        $(".progress-bar").addClass("progress-bar-striped progress-bar-danger active");
+      }
+
+      if(status_percent_js_var == 100){
+        $(".progress-bar").removeClass("progress-bar-striped progress-bar-danger active");
+        $(".progress-bar").addClass("progress-bar-success");
+      }
+
+      $('.progress-bar').width(status_percent_js_var + '%');
+      $('.percentp').text(status_percent_js_var + '%');
+
+      if(status_1_js_var == "Up"){
+        $(".line-status").addClass("list-group-item-success");
+        $(".line-status").removeClass("list-group-item-danger");
+      }
+
+      if(status_1_js_var != "Up"){
+        $(".line-status").removeClass("list-group-item-success");
+        $(".line-status").addClass("list-group-item-danger");
+      }
+
+      if(status_2_js_var == "Up"){
+        $(".internet-status").addClass("list-group-item-success");
+        $(".internet-status").removeClass("list-group-item-danger");
+      }
+
+      if(status_2_js_var != "Up"){
+        $(".internet-status").removeClass("list-group-item-success");
+        $(".internet-status").addClass("list-group-item-danger");
+      }
+
+      $('.line-status').text(status_1_js_var);
+      $('.internet-status').text(status_2_js_var);
+
+      var time_check = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+
+      $('.timecheck').text(DisplayCurrentTime());
+      $(".timecheck").fadeIn(100).fadeOut(100).fadeIn(100);
+
+    });
+
+
+  }
+
+  function DisplayCurrentTime() {
+    var date = new Date();
+    var hours = date.getHours() > 12 ? date.getHours() - 12 : date.getHours();
+    var am_pm = date.getHours() >= 12 ? "PM" : "AM";
+    hours = hours < 10 ? "0" + hours : hours;
+    var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+    var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+    time = hours + ":" + minutes + ":" + seconds + " " + am_pm;
+    return time;
+  };
+
+  setInterval(function() {
+    runCheck();
+  }, 2500);
+
+
+</script>
+</body>
+</html>
